@@ -5,6 +5,14 @@ const detect = require('./locale/detect');
 
 const PUBLIC_ROOT = path.resolve(process.cwd(), 'public');
 
+const mimeByExt = {
+    'html': 'text/html; charset=utf-8',
+    'css': 'text/css',
+    'js': 'text/javascript',
+    'jpg': 'image/jpeg',
+    'png': 'image/png',
+};
+
 const tryFiles = (requestedPath, req, res) => {
     // If exists (we need this file)
     if (!fs.existsSync(requestedPath)) {
@@ -21,10 +29,12 @@ const tryFiles = (requestedPath, req, res) => {
         return tryFiles(path.resolve(requestedPath, 'index.html'), req, res);
     }
 
-    if (requestedPath.endsWith('.html')) {
-        const language = detect(req);
-        res.setHeader('Content-type', 'text/html; charset=utf-8');
+    const ext = requestedPath.slice(requestedPath.lastIndexOf('.') + 1);
 
+    res.setHeader('Content-Type', mimeByExt[ext]);
+
+    if (ext === 'html') {
+        const language = detect(req);
         const html = fs.readFileSync(requestedPath, {
             encoding: 'utf-8',
         });
